@@ -3,7 +3,7 @@
  *github link: https://github.com/iPhilBln/iobroker-pyatv
  *
  * username: xyz -> default user for pyatv scripts
- * pollingPowerState: 0 -> obj.getPowerStateByEvent() is called for each device, get state in realtime but takes a lot of memory (~77MB for each device)
+ * pollingPowerState: 0 -> obj.getPowerStateByEvent() is called for each device, get state in realtime but takes a lot of memory (~77MB for each device), but prefferd way
  *                   >0 -> obj.getPowerStateByPolling() time in seconds to get the device state
  * pathToConfig: path where your config is stored in iobroker
  * 
@@ -27,7 +27,6 @@ function startSubscription() {
     on({ id: 'alexa2.0.History.summary', change: 'ne' }, function (dp) {
         const val = dp.state.val
         const alexaDevice = getState('alexa2.0.History.name').val.toLowerCase();
-        console.log(alexaDevice);
 
         if(dp.state.val.length > 0){
             if (val.includes('wohnzimmer')) {
