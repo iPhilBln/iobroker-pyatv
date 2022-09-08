@@ -1,0 +1,95 @@
+{
+    "date": "26. August 2022",
+    "devices": [
+      {
+        "name": "ATV Wohnzimmer",
+        "id": "DC56E7...",
+        "credentials": {
+            "companion": "c66a968278b2d609c3f17b845a895a39958aab30bcb8a2...",
+            "airplay": "c66a968278b2d609c3f17b845a895a39958aab30bcb8a2cf..."
+          },
+        "apps": [
+          {
+            "name": "apple t. v.",
+            "link": ""
+          },
+          {
+            "name": "fernseher",
+            "link": "de.telekom.entertaintv-iphone"
+          },
+          {
+            "name": "magenta",
+            "link": "de.telekom.entertaintv-iphone"
+          },
+          {
+            "name": "dazn",
+            "link": "com.dazn.theApp"
+          },
+          {
+            "name": "disney plus",
+            "link": "com.disney.disneyplus"
+          },
+          {
+            "name": "amazon prime",
+            "link": "com.amazon.aiv.AIVApp"
+          },
+          {
+            "name": "netflix",
+            "link": "com.netflix.Netflix"
+          },
+          {
+            "name": "youtube",
+            "link": "com.google.ios.youtube"
+          },
+          {
+            "name": "spotify",
+            "link": "com.spotify.client"
+          }
+        ]
+      },
+      {
+        "name": "ATV Schlafzimmer",
+        "id": "C869CD7...",
+        "credentials": {
+            "companion": "681e217f3e426f585da3ac31ba9d08f9cd43219...",
+            "airplay": "681e217f3e426f585da3ac31ba9d08f9cd4321964..."
+        },
+        "apps": [
+          {
+            "name": "apple t. v.",
+            "link": ""
+          },
+          {
+            "name": "magenta",
+            "link": "de.telekom.entertaintv-iphone"
+          },
+          {
+            "name": "dazn",
+            "link": "com.dazn.theApp"
+          },
+          {
+            "name": "disney plus",
+            "link": "com.disney.disneyplus"
+          },
+          {
+            "name": "amazon prime",
+            "link": "com.amazon.aiv.AIVApp"
+          },
+          {
+            "name": "netflix",
+            "link": "com.netflix.Netflix"
+          },
+          {
+            "name": "youtube",
+            "link": "com.google.ios.youtube"
+          },
+          {
+            "name": "spotify",
+            "link": "com.spotify.client"
+          }
+        ]
+      }
+    ]
+  }
+  
+  
