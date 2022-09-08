@@ -1,6 +1,6 @@
  /*
  *autor: iPhilBln
- *github link: tba
+ *github link: https://github.com/iPhilBln/iobroker-pyatv
  *
  * username: xyz -> default user for pyatv scripts
  * pollingPowerState: 0 -> obj.getPowerStateByEvent() is called for each device, get state in realtime but takes a lot of memory (~77MB for each device)
