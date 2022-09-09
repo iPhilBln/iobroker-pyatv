@@ -508,7 +508,6 @@ function subscriptionCmd(callback) {
 async function startPolling(callback) {
     console.log('start polling...');
     if (pollingPowerState) {
-        //let callCallback = true;
         let polling = true;
         onStop(() => { polling = false; });
         callback();
@@ -519,11 +518,8 @@ async function startPolling(callback) {
             for (let i = 0; i < atvDevices.length; i++) {
                 if (debug) console.log('fetching state for ' + atvDevices[i].name + ' ...');
                 const { stdout, stderr } = await atvDevices[i].getPowerStateByPolling();
-                /*if (debug)*/ console.log('result: ' + stdout, stderr);
+                if (debug) console.log('result: ' + stdout, stderr);
             }
-
-            //if (callCallback) callback();
-            //callCallback = false;
 
             let timeDifference = new Date().getTime() - ts;
             if (debug) console.log(pollingPowerState * 1000 - timeDifference);
