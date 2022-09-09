@@ -1,34 +1,34 @@
- /*
- *autor: iPhilBln
- *github link: https://github.com/iPhilBln/iobroker-pyatv
- *
- * username: xyz -> default user for pyatv scripts
- * pollingPowerState: 0 -> obj.getPowerStateByEvent() is called for each device, get state in realtime but takes a lot of memory (~77MB for each device), but prefferd way
- *                   >0 -> obj.getPowerStateByPolling() time in seconds to get the device state
- * pathToConfig: path where your config is stored in iobroker
- * 
- * Blockly: delete line 28-42 and connect your alexa.summary datapoint with pyatv.app datapoint
- */
+/*
+*autor: iPhilBln
+*github link: https://github.com/iPhilBln/iobroker-pyatv
+*
+* username: xyz -> default user for pyatv scripts
+* pollingPowerState: 0 -> obj.getPowerStateByEvent() is called for each device, get state in realtime but takes a lot of memory (~77MB for each device), but preferred way
+*                   >0 -> obj.getPowerStateByPolling() time in seconds to get the device state
+* pathToConfig: path where your config is stored in iobroker
+* 
+* Blockly: delete line 26-43 and connect your alexa.summary datapoint with pyatv.app datapoint
+*/
 
 /*----------========== Einstellungen ==========----------*/
 
 const username = 'iobroker';
-const pollingPowerState = 0;     
+const pollingPowerState = 0;
 
 let pathToConfig = '0_userdata.0.apple_tv.config';
 
 const debug = false;
 
-/*----------========== Eigener Teil ==========----------*/
-
 function startSubscription() {
     console.log('start subscription...');
+
+    /*----------========== Eigener Teil ==========----------*/
 
     on({ id: 'alexa2.0.History.summary', change: 'ne' }, function (dp) {
         const val = dp.state.val
         const alexaDevice = getState('alexa2.0.History.name').val.toLowerCase();
 
-        if(dp.state.val.length > 0){
+        if (dp.state.val.length > 0) {
             if (val.includes('wohnzimmer')) {
                 selectDevice('ATV Wohnzimmer', val);
             } else if (val.includes('schlafzimmer')) {
@@ -40,13 +40,9 @@ function startSubscription() {
             }
         }
     });
+
+    /*----------========== Ende Eigener Teil ==========----------*/
 }
-
-/*----------========== Ende Eigener Teil ==========----------*/
-
-/*----------========== Pfadkorrektur ==========----------*/
-
-if (pathToConfig.charAt(pathToConfig.length - 1) === '.') pathToConfig = pathToConfig.slice(0, -1);
 
 /*----------========== Geräteauswahl ==========----------*/
 
@@ -62,7 +58,7 @@ function selectDevice(deviceName, strIn) {
 /*----------========== Klasse AppleTv ==========----------*/
 class AppleTv {
 
-	#timerSetOnlineState;
+    #timerSetOnlineState;
     #pid;
 
     constructor(username, id, name, arrApps, pathToState, credentials) {
@@ -75,10 +71,10 @@ class AppleTv {
         this.pathToState = pathToState;
         this.credentials = credentials;
         this.pathToPythonModule = { "remote": '', "script": '' };
-    
-		this.#timerSetOnlineState = false;
+
+        this.#timerSetOnlineState = false;
         this.#pid = 0;
-	}
+    }
 
     getPowerStateByEvent() {
 
@@ -94,13 +90,13 @@ class AppleTv {
 
         const args = [pyFile, arg1, arg2, arg3, arg4, arg5, arg6, arg7];
 
-        return new Promise ( done => {
+        return new Promise( done => {
             const pyspawn = spawn('python3', args);
 
             this.#pid = pyspawn.pid;
-            
+
             pyspawn.stdout.setEncoding('utf8');
-            pyspawn.stdout.on('data', (data) => {
+            pyspawn.stdout.on('data', data => {
                 try {
                     let state = JSON.parse(data);
                     if (state.hasOwnProperty('power_state')) {
@@ -116,17 +112,17 @@ class AppleTv {
                 }
                 catch (error) {
                     done(new Error(`${error}`));
-                    return; 
+                    return;
                 }
             });
 
             pyspawn.stderr.setEncoding('utf8');
-            pyspawn.stderr.on('data', (data) => {
+            pyspawn.stderr.on('data', data => {
                 console.error(`${this.name} -> stderr: ${data}`);
                 done(new Error(`${data}`));
             });
 
-            pyspawn.on('close', (code) => { console.log(`${this.name} -> child process for device exited with code ${code}`); });
+            pyspawn.on('close', code => { console.log(`${this.name} -> child process for device exited with code ${code}`); });
 
         });
     }
@@ -150,13 +146,13 @@ class AppleTv {
 
         return new Promise( done => {
             exec('python3 ' + args, (error, stdout, stderr) => {
-                if(error) {
+                if (error) {
                     done(new Error(`${error}`));
                     return;
                 }
-                if(stdout.includes('On')) this.setPowerState(true);
-                else if(stdout.includes('Off')) this.setPowerState(false);
-                done({stdout, stderr});
+                if (stdout.includes('On')) this.setPowerState(true);
+                else if (stdout.includes('Off')) this.setPowerState(false);
+                done({ stdout, stderr });
             });
         });
     }
@@ -166,8 +162,8 @@ class AppleTv {
 
         if (!this.#timerSetOnlineState && powerState != this.powerState) {
             this.powerState = powerState;
-			this.#timerSetOnlineState = true;
-			setTimeout(() => { this.#timerSetOnlineState = false; }, 7500 );
+            this.#timerSetOnlineState = true;
+            setTimeout(() => { this.#timerSetOnlineState = false; }, 7500);
             setState(id, this.powerState, true, () => {
                 if (powerState) console.log('Your device ' + this.name + ' is powered on.');
                 else console.log('Your device ' + this.name + ' is powered off.');
@@ -184,7 +180,7 @@ class AppleTv {
 
         return new Promise( done => {
             exec(findPathCmd[0], (error, stdout, stderr) => {
-                if(error) {
+                if (error) {
                     done(new Error(`${error}`));
                     return;
                 } else {
@@ -193,7 +189,7 @@ class AppleTv {
                         this.pathToPythonModule.remote = path[0];
 
                         exec(findPathCmd[1], (error, stdout, stderr) => {
-                            if(error) {
+                            if (error) {
                                 done(new Error(`${error}`));
                                 return;
                             } else {
@@ -230,10 +226,10 @@ class AppleTv {
 
         const args = pyFile + ' ' + arg1 + ' ' + arg2 + ' ' + arg3 + ' ' + arg4 + ' ' + arg5 + ' ' + arg6 + ' ';
 
-        const setState = (state) => {
+        const setState = state => {
             switch (state) {
                 case 'home':
-                    this.command += 'home '; 
+                    this.command += 'home ';
                     break;
                 case 'hauptmenü':
                 case 'home hold':
@@ -247,48 +243,48 @@ class AppleTv {
                     break;
                 case 'nächste':
                 case 'next':
-                    this.command += 'next '; 
-                    break;		
+                    this.command += 'next ';
+                    break;
                 case 'aus':
                 case 'off':
-                    this.command += 'turn_off '; 
+                    this.command += 'turn_off ';
                     break;
                 case 'ein':
                 case 'an':
-				case 'on':
-                    this.command += 'turn_on '; 
+                case 'on':
+                    this.command += 'turn_on ';
                     break;
                 case 'pausiere':
                 case 'pause':
-                    this.command += 'pause '; 
+                    this.command += 'pause ';
                     break;
                 case 'spiele':
-				case 'play':
-                    this.command += 'play '; 
+                case 'play':
+                    this.command += 'play ';
                     break;
             }
         };
 
         const dictCmd = [
-                'home',
-                'hauptmenü', 
-                'home hold', 
-                'left', 
-                'menü', 
-                'menu',
-                'nächste', 
-                'next', 
-                'aus', 
-                'off', 
-                'ein', 
-                'an', 
-                'on',
-                'pausiere', 
-                'pause', 
-                'spiele', 
-                'play'
+            'home',
+            'hauptmenü',
+            'home hold',
+            'left',
+            'menü',
+            'menu',
+            'nächste',
+            'next',
+            'aus',
+            'off',
+            'ein',
+            'an',
+            'on',
+            'pausiere',
+            'pause',
+            'spiele',
+            'play'
         ];
-        
+
         for (let j = 0; j < dictCmd.length; j++) {
             if (strIn.includes(dictCmd[j])) {
                 for (let i = 0; i < this.arrApps.length; i++) {
@@ -301,7 +297,7 @@ class AppleTv {
                     }
                 }
                 break;
-            } 
+            }
         }
     }
 
@@ -336,6 +332,8 @@ class AppleTv {
 
 let atvDevices, pathToState;
 
+if (pathToConfig.charAt(pathToConfig.length - 1) === '.') pathToConfig = pathToConfig.slice(0, -1);
+
 createDevices(JSON.parse(getState(pathToConfig).val), createDataPoint);
 
 async function createDevices(obj, callback) {
@@ -345,15 +343,15 @@ async function createDevices(obj, callback) {
     atvDevices = [];
     for (let i = 0; i < obj.devices.length; i++) {
         atvDevices[i] = new AppleTv(username,
-                                    obj.devices[i].id,
-                                    obj.devices[i].name,
-                                    obj.devices[i].apps,
-                                    pathToState,
-                                    obj.devices[i].credentials);
+            obj.devices[i].id,
+            obj.devices[i].name,
+            obj.devices[i].apps,
+            pathToState,
+            obj.devices[i].credentials);
 
         const result = await atvDevices[i].setPathToPythonModule();
-        if(debug) console.log(result);
-        if(debug) console.log(atvDevices[i].toString());
+        if (debug) console.log(result);
+        if (debug) console.log(atvDevices[i].toString());
     }
     callback(subscriptionConfigFile);
 }
@@ -364,14 +362,14 @@ async function createDataPoint(callback) {
     for (let i = 0; i < atvDevices.length; i++) {
         let nameOfDevice = pathToState + '.' + atvDevices[i].name;
 
-        await createStateAsync(nameOfDevice +  '.online', false, true, {
+        await createStateAsync(nameOfDevice + '.online', false, true, {
             'name': 'online state',
             'role': 'state',
             'read': true,
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created online state for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created online state for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.app', '', true, {
             'name': 'app cmd',
@@ -380,7 +378,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'string'
         });
-        if(debug) console.log('Created app cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created app cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.home', true, true, {
             'name': 'home',
@@ -389,7 +387,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created home cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created home cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.home hold', true, true, {
             'name': 'home_hold',
@@ -398,7 +396,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created home hold cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created home hold cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.left', true, true, {
             'name': 'left',
@@ -407,7 +405,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created left cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created left cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.menu', true, true, {
             'name': 'menu',
@@ -416,7 +414,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created menu cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created menu cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.next', true, true, {
             'name': 'next',
@@ -425,7 +423,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created next cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created next cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.on', true, true, {
             'name': 'turn_on',
@@ -434,7 +432,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created on cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created on cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.off', true, true, {
             'name': 'turn_off',
@@ -443,7 +441,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created off cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created off cmd for device: ' + atvDevices[i].name);
 
 
         await createStateAsync(nameOfDevice + '.cmd.pause', true, true, {
@@ -453,7 +451,7 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created pause cmd for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created pause cmd for device: ' + atvDevices[i].name);
 
         await createStateAsync(nameOfDevice + '.cmd.play', true, true, {
             'name': 'play',
@@ -462,14 +460,14 @@ async function createDataPoint(callback) {
             'write': true,
             'type': 'boolean'
         });
-        if(debug) console.log('Created play button for device: ' + atvDevices[i].name);
+        if (debug) console.log('Created play button for device: ' + atvDevices[i].name);
     }
     callback(subscriptionCmd)
 }
 
 function subscriptionConfigFile(callback) {
     on({ id: pathToConfig, change: 'ne' }, function (dp) {
-        if(!pollingPowerState) atvDevices.forEach(device => {device.killGetPowerStateByEvent()});
+        if (!pollingPowerState) atvDevices.forEach(device => { device.killGetPowerStateByEvent() });
         createDevices(JSON.parse(dp.state.val), createDataPoint);
     });
     callback(startPolling);
@@ -478,59 +476,65 @@ function subscriptionConfigFile(callback) {
 function subscriptionCmd(callback) {
     console.log('start subscription for commands...')
 
-	for(let i = 0; i < atvDevices.length; i++) {
-		
+    for (let i = 0; i < atvDevices.length; i++) {
+
         let nameOfDevice = pathToState + '.' + atvDevices[i].name;
 
-        on({id: nameOfDevice + '.cmd.app', change: 'ne'}, function(dp) {
-			if(dp.state.val.length > 0) {
+        on({ id: nameOfDevice + '.cmd.app', change: 'ne' }, function (dp) {
+            if (dp.state.val.length > 0) {
                 atvDevices[i].setChannel(dp.state.val);
-                setStateDelayed(nameOfDevice + '.cmd.app', '', true, 500, true);    
+                setStateDelayed(nameOfDevice + '.cmd.app', '', true, 500, true);
             }
-		});
+        });
 
-		on({id:[nameOfDevice + '.cmd.home', 
-                nameOfDevice + '.cmd.home hold', 
-                nameOfDevice + '.cmd.left', 
-                nameOfDevice + '.cmd.menu', 
-                nameOfDevice + '.cmd.next', 
-                nameOfDevice + '.cmd.off', 
-                nameOfDevice + '.cmd.on', 
-                nameOfDevice + '.cmd.pause', 
-                nameOfDevice + '.cmd.play'], val: true}, function(dp) {
+        on({
+            id: [nameOfDevice + '.cmd.home',
+            nameOfDevice + '.cmd.home hold',
+            nameOfDevice + '.cmd.left',
+            nameOfDevice + '.cmd.menu',
+            nameOfDevice + '.cmd.next',
+            nameOfDevice + '.cmd.off',
+            nameOfDevice + '.cmd.on',
+            nameOfDevice + '.cmd.pause',
+            nameOfDevice + '.cmd.play'], val: true
+        }, function (dp) {
             atvDevices[i].setCmd(dp.name);
-            if(debug) console.log('detected command: ' + dp.name);
-		});
-	}
-	callback(startSubscription);
+            if (debug) console.log('detected command: ' + dp.name);
+        });
+    }
+    callback(startSubscription);
 }
 
 async function startPolling(callback) {
     console.log('start polling...');
     if (pollingPowerState) {
-        let callCallback = true;
+        //let callCallback = true;
         let polling = true;
-        onStop(() => {polling = false;});
-        do{
+        onStop(() => { polling = false; });
+        callback();
+
+        do {
             let ts = new Date().getTime();
+
             for (let i = 0; i < atvDevices.length; i++) {
-                if(debug) console.log('fetching state for ' + atvDevices[i].name + ' ...');
-                const {stdout, stderr} = await atvDevices[i].getPowerStateByPolling();
-                if(debug) console.log('result: ' + stdout, stderr);
+                if (debug) console.log('fetching state for ' + atvDevices[i].name + ' ...');
+                const { stdout, stderr } = await atvDevices[i].getPowerStateByPolling();
+                /*if (debug)*/ console.log('result: ' + stdout, stderr);
             }
 
-            if(callCallback) callback();
-            callCallback = false;
+            //if (callCallback) callback();
+            //callCallback = false;
 
             let timeDifference = new Date().getTime() - ts;
-            if(debug) console.log(pollingPowerState * 1000 - timeDifference);
+            if (debug) console.log(pollingPowerState * 1000 - timeDifference);
             await wait(pollingPowerState * 1000 - timeDifference);
-        }while(polling);
+
+        } while (polling);
     } else {
-        onStop(() => { atvDevices.forEach(device => {device.killGetPowerStateByEvent();}); });
+        onStop(() => { atvDevices.forEach( device => { device.killGetPowerStateByEvent(); }); });
         for (let i = 0; i < atvDevices.length; i++) {
             const result = await atvDevices[i].getPowerStateByEvent();
-            if(debug) console.log(result);
+            if (debug) console.log(result);
         }
         callback();
     }
